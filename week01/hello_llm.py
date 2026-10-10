@@ -24,6 +24,18 @@ from dotenv import load_dotenv
 # 从仓库根目录读 .env（这样在任意子目录下运行都能找到）
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
+
+def get_key(name: str) -> str | None:
+    """读 API Key，并把 .env.example 里的占位符当成"没配"。
+
+    不这么做的话，`ANTHROPIC_API_KEY=sk-ant-xxxxx` 这种占位值会被当成真 Key，
+    脚本会去调 Anthropic 然后认证失败，报错信息还特别误导人。
+    """
+    value = (os.getenv(name) or "").strip()
+    if not value or "xxxxx" in value:
+        return None
+    return value
+
 # ---------------------------------------------------------------- 任务数据
 
 # 真实场景：TEMU 全托管，家居日用品类目，抱枕套
@@ -53,7 +65,7 @@ def call_anthropic() -> None:
     import anthropic
 
     model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5-5")
-    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    client = anthropic.Anthropic(api_key=get_key("ANTHROPIC_API_KEY"))
 
     print(f"供应商 : Anthropic")
     print(f"模型   : {model}")
@@ -88,7 +100,7 @@ def call_deepseek() -> None:
     model = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
     # DeepSeek 兼容 OpenAI 的接口协议，所以直接用 openai 这个库，只改 base_url
     client = openai.OpenAI(
-        api_key=os.environ["DEEPSEEK_API_KEY"],
+        api_key=get_key("DEEPSEEK_API_KEY"),
         base_url="https://api.deepseek.com",
     )
 
@@ -111,9 +123,35 @@ def call_deepseek() -> None:
     print("本次花费 : DeepSeek 按人民币计价且有时段优惠，请查 platform.deepseek.com 账单")
 
 
+def list_deepseek_models() -> None:
+    """列出你账号下可用的 DeepSeek 模型，用来确认 model id 到底叫什么。
+
+    模型名字会变，与其猜，不如直接问接口。
+    """
+    import openai
+
+    client = openai.OpenAI(
+        api_key=get_key("DEEPSEEK_API_KEY"),
+        base_url="https://api.deepseek.com",
+    )
+    models = client.models.list()
+    print("可用模型：")
+    for m in sorted(models.data, key=lambda x: x.id):
+        print(f"  {m.id}")
+    print("\n把想要的那个填到 .env 的 DEEPSEEK_MODEL 里。")
+
+
 def main() -> None:
-    has_anthropic = bool(os.getenv("ANTHROPIC_API_KEY"))
-    has_deepseek = bool(os.getenv("DEEPSEEK_API_KEY"))
+    # 支持 `python hello_llm.py --models` 先看有哪些模型可用
+    if "--models" in sys.argv:
+        if not get_key("DEEPSEEK_API_KEY"):
+            print("需要先在 .env 里配好 DEEPSEEK_API_KEY")
+            sys.exit(1)
+        list_deepseek_models()
+        return
+
+    has_anthropic = bool(get_key("ANTHROPIC_API_KEY"))
+    has_deepseek = bool(get_key("DEEPSEEK_API_KEY"))
 
     if not has_anthropic and not has_deepseek:
         print("没有找到任何 API Key。")
