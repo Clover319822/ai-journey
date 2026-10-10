@@ -105,8 +105,35 @@ git rebase --root --exec 'git commit --amend --reset-author --no-edit'
 
 Sonnet 4.5 将于 2026-11-30 下线。
 
+## 第一个真实调用（22:47 跑通）
+
+```
+供应商 : DeepSeek
+模型   : deepseek-chat
+
+原标题 : 新款简约现代抱枕套 客厅沙发靠垫套 45x45cm 不含芯
+改写后 : Modern Throw Pillow Cover 45x45cm for Couch Sofa Living Room
+
+输入 token: 147
+输出 token: 17
+```
+
+**复盘这次输出哪里不够好**（明天优化 prompt 的方向）：
+
+1. 没写材质。原标题也没给，但真实 listing 一定要有 —— 买家搜 "linen pillow cover" 不会搜 "modern"
+2. 没写数量（1 片还是 2 片装），这是 TEMU 买家的核心关切
+3. `Throw Pillow Cover` 是对的，这个词比 `Cushion Cover` 在北美搜索量高
+4. 没提场景词 `Decorative`，也没提"不含芯"（Insert Not Included），后者能显著减少退货纠纷
+
+**成本**：164 个 token，单次花费可以忽略。但记住这个数量级 ——
+一次普通对话约几百 token，一个跑飞的 Agent 循环一晚上能烧掉几十万 token。
+从第一个脚本开始就盯着 `usage` 这两个数字，这是后面做成本控制的地基。
+
+**不需要装 DeepSeek 软件**：模型跑在对方服务器上，我们只是发一个 HTTPS 请求过去拿结果。
+本机装的 `openai` / `anthropic` 这两个库只是"发请求的工具"，不是模型本身。
+
 ## 明天
 
-- 拿到 Anthropic / DeepSeek API Key，跑通 `week01/hello_llm.py`
 - CS50P 第 0 课
 - Python 基础：数据类型、控制流、函数
+- 优化这个改写 prompt：补上材质、数量、是否含芯，并加一条"输出严格 JSON"

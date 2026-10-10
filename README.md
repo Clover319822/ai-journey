@@ -53,4 +53,4 @@
 
 | 日期 | 状态 |
 |---|---|
-| 2026-10-10 (Day 1) | 环境打通：GitHub 账号、SSH 密钥、git 配置，第一个 commit |
+| 2026-10-10 (Day 1) | 环境全通：GitHub + SSH + Python/uv + 4 个 commit；**跑通第一个真实大模型调用**（DeepSeek 改写 TEMU listing，147/17 token） |
