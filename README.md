@@ -54,3 +54,4 @@
 | 日期 | 状态 |
 |---|---|
 | 2026-10-10 (Day 1) | 环境全通：GitHub + SSH + Python/uv + 4 个 commit；**跑通第一个真实大模型调用**（DeepSeek 改写 TEMU listing，147/17 token） |
+| 2026-10-11 (Day 2) | Python 函数练习 + VS Code 环境跑通；批量改写 8 条 listing（6/8 全过），导出 output.xlsx，1558/158 token |
