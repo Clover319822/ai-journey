@@ -20,8 +20,10 @@ env/
 data/raw/
 data/output/
 *.xlsx
+!output.xlsx
 *.csv
 !sample/*.csv
+!week02/data/*.csv
 *.db
 *.chroma/
 
